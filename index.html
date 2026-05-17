@@ -1,650 +1,1730 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Weather Quest Cube | Top Goal Unit 8 Adventure</title>
-    <!-- Google Fonts & Font Awesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Three.js Core & OrbitControls -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-            }
-        }
-    </script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>الخوارزمي الصغير - مسابقة الرياضيات الكبرى</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2 family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #050714;
+    --bg-gradient: radial-gradient(circle at 50% 30%, #151d4a 0%, #080c24 60%, #03050f 100%);
+    --card-bg: linear-gradient(145deg, rgba(20, 30, 75, 0.95), rgba(10, 15, 45, 0.95));
+    --gold: #f3c64f;
+    --gold-light: #fdf0cd;
+    --gold-dark: #9e7515;
+    --gold-grad: linear-gradient(135deg, #fff3cd 0%, #f3c64f 50%, #b88a1e 100%);
+    --cyan-grad: linear-gradient(135deg, #a5f3fc 0%, #06b6d4 100%);
+    --green: #10b981;
+    --green-grad: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    --red: #f43f5e;
+    --red-grad: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+    --text-light: #f8fafc;
+    --text-muted: #94a3b8;
+    --shadow-gold: 0 0 20px rgba(243, 198, 79, 0.3);
+    --shadow-cyan: 0 0 20px rgba(6, 182, 212, 0.3);
+    --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-        body {
-            font-family: 'Quicksand', sans-serif;
-            overflow-x: hidden;
-            min-height: 100vh;
-            background: linear-gradient(145deg, #90d2ff 0%, #c0e4ff 100%);
-            position: relative;
-        }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-        /* Animated Clouds & Floating Weather Icons */
-        .cloud {
-            position: fixed;
-            background: rgba(255,255,255,0.9);
-            border-radius: 1000px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            z-index: 1;
-            pointer-events: none;
-        }
-        .cloud::before, .cloud::after {
-            content: '';
-            position: absolute;
-            background: inherit;
-            border-radius: 50%;
-        }
-        .cloud::before { width: 50px; height: 50px; top: -25px; left: 15px; }
-        .cloud::after { width: 70px; height: 70px; top: -35px; left: 45px; }
-        .cloud1 { width: 110px; height: 60px; top: 15%; left: -10%; animation: drift 35s linear infinite; }
-        .cloud2 { width: 140px; height: 70px; top: 45%; right: -5%; animation: drift 45s linear infinite reverse; }
-        .cloud3 { width: 90px; height: 50px; bottom: 20%; left: 5%; animation: drift 25s linear infinite; }
+  body {
+    font-family: 'Tajawal', 'Cairo', sans-serif;
+    color: var(--text-light);
+    background: var(--bg-deep);
+    background-image: var(--bg-gradient);
+    min-height: 100vh;
+    overflow-x: hidden;
+    direction: rtl;
+    position: relative;
+  }
 
-        @keyframes drift {
-            from { transform: translateX(0); }
-            to { transform: translateX(120vw); }
-        }
+  /* Particle Effect Canvas Background */
+  #particles-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.6;
+  }
 
-        .floating-icon {
-            position: fixed;
-            font-size: 1.8rem;
-            opacity: 0.3;
-            pointer-events: none;
-            animation: float 12s infinite ease-in-out;
-            z-index: 1;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-25px) rotate(5deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
+  .stage {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 
-        /* Main layout */
-        .game-container {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 1rem;
-            min-height: 100vh;
-        }
+  /* Sweep spotlights background animation */
+  .spotlight {
+    position: absolute;
+    width: 50vw;
+    height: 50vw;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(120px);
+    opacity: 0.15;
+    z-index: 1;
+  }
+  .spotlight.blue {
+    background: #2563eb;
+    top: -10%;
+    right: 10%;
+    animation: floatingLight 15s infinite alternate ease-in-out;
+  }
+  .spotlight.gold {
+    background: #eab308;
+    bottom: -10%;
+    left: 10%;
+    animation: floatingLight 20s infinite alternate-reverse ease-in-out;
+  }
+  @keyframes floatingLight {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(10%, 15%) scale(1.3); }
+  }
 
-        /* Saudi Characters */
-        .characters {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-        .character {
-            background: #ffefcf;
-            border-radius: 100px;
-            padding: 0.4rem 1rem 0.4rem 0.6rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 6px 0 #c29b4a;
-            transition: transform 0.2s;
-        }
-        .character img {
-            width: 48px;
-            height: 48px;
-            background: #f9d9a5;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .character span {
-            font-weight: bold;
-            font-size: 1rem;
-            color: #3a2800;
-        }
+  /* Welcome Screen UI Styles */
+  .welcome-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px 20px;
+    z-index: 50;
+    position: relative;
+  }
 
-        /* 3D Cube Area */
-        .cube-stage {
-            width: 320px;
-            height: 320px;
-            margin: 20px auto;
-            position: relative;
-            cursor: grab;
-        }
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
-            border-radius: 32px;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
-        }
+  .welcome-card {
+    position: relative;
+    max-width: 540px;
+    width: 100%;
+    padding: 2px;
+    border-radius: 28px;
+    background: linear-gradient(135deg, rgba(243, 198, 79, 0.45) 0%, rgba(243, 198, 79, 0.05) 100%);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.7), 0 0 30px rgba(243,198,79,0.1);
+    animation: fadeInUp 0.8s ease-out;
+  }
 
-        .roll-btn {
-            background: #ff9f4a;
-            border: none;
-            font-size: 1.8rem;
-            font-weight: bold;
-            font-family: inherit;
-            padding: 12px 28px;
-            border-radius: 60px;
-            color: white;
-            text-shadow: 2px 2px 0 #b45f1b;
-            box-shadow: 0 8px 0 #b45f1b;
-            transition: 0.07s linear;
-            cursor: pointer;
-            margin: 16px 0;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .roll-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 #b45f1b;
-        }
+  .welcome-inner {
+    background: linear-gradient(180deg, #0e163b 0%, #060b24 100%);
+    border-radius: 26px;
+    padding: 40px 32px;
+    text-align: center;
+  }
 
-        /* Activity Panel */
-        .activity-panel {
-            background: rgba(255, 248, 225, 0.95);
-            backdrop-filter: blur(5px);
-            border-radius: 48px;
-            width: 90%;
-            max-width: 750px;
-            margin: 15px auto 30px;
-            padding: 25px 20px;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            border: 3px solid white;
-        }
+  .welcome-inner h1 {
+    font-size: clamp(28px, 4.5vw, 42px);
+    margin-bottom: 8px;
+  }
 
-        .activity-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            border-bottom: 2px dashed #ffbc6e;
-            padding-bottom: 12px;
-            margin-bottom: 20px;
-        }
-        .badge-area {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-        .xp-bar {
-            background: #e9d5b5;
-            border-radius: 20px;
-            height: 16px;
-            width: 150px;
-            overflow: hidden;
-        }
-        .xp-fill {
-            width: 0%;
-            height: 100%;
-            background: #5fc936;
-            transition: width 0.3s;
-        }
-        .badge-icon {
-            font-size: 1.8rem;
-            cursor: help;
-        }
+  .welcome-inner .welcome-sub {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
 
-        /* Interactive Activity Content */
-        .activity-content {
-            min-height: 280px;
-        }
-        .choice-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .option-card {
-            background: white;
-            border-radius: 30px;
-            padding: 12px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.1s;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            border: 2px solid transparent;
-        }
-        .option-card:hover { transform: scale(1.02); background: #ffefcf; }
-        .correct-feedback { color: #2b8c1e; font-weight: bold; margin: 10px; }
-        .wrong-feedback { color: #d9534f; font-weight: bold; }
+  .welcome-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: right;
+  }
 
-        /* Wheel spinner */
-        .wheel-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        canvas.wheel-canvas {
-            width: 200px;
-            height: 200px;
-            background: white;
-            border-radius: 50%;
-        }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 
-        button {
-            background: #fed287;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-weight: bold;
-            font-family: inherit;
-            margin: 5px;
-            cursor: pointer;
-        }
+  .form-group label {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--gold-light);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 
-        @media (max-width: 650px) {
-            .cube-stage { width: 250px; height: 250px; }
-            .roll-btn { font-size: 1.4rem; padding: 8px 20px; }
-        }
-        .speak-btn {
-            background: #6cc9f0;
-            color: white;
-            border-radius: 100%;
-            width: 36px;
-            height: 36px;
-        }
-    </style>
+  .form-group input {
+    background: rgba(13, 20, 48, 0.8);
+    border: 1px solid rgba(243, 198, 79, 0.25);
+    border-radius: 14px;
+    padding: 14px 18px;
+    color: var(--text-light);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    outline: none;
+    transition: var(--transition);
+    text-align: right;
+  }
+
+  .form-group input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(243, 198, 79, 0.25);
+    background: rgba(13, 20, 48, 0.95);
+  }
+
+  /* Main Board and Game Area */
+  main {
+    flex: 1;
+    max-width: 1280px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px 20px;
+    position: relative;
+    z-index: 20;
+    display: none; /* Hidden until welcome form is filled */
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 24px;
+    animation: fadeInDown 0.8s ease-out;
+  }
+
+  .eyebrow-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(243, 198, 79, 0.1);
+    border: 1px solid rgba(243, 198, 79, 0.3);
+    padding: 6px 16px;
+    border-radius: 50px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-shadow: 0 0 8px rgba(243, 198, 79, 0.5);
+  }
+
+  h1 {
+    font-size: clamp(34px, 5vw, 56px);
+    font-weight: 900;
+    line-height: 1.1;
+    background: linear-gradient(to bottom, #ffffff 10%, #fdf0cd 40%, #f3c64f 80%, #9e7515 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    letter-spacing: -1px;
+  }
+
+  .subtitle {
+    margin-top: 10px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .subtitle .g {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* User Info Badge on Game Screen */
+  .competitor-badge {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: linear-gradient(135deg, rgba(13, 20, 48, 0.9), rgba(5, 7, 20, 0.9));
+    border: 1px solid rgba(243, 198, 79, 0.25);
+    border-radius: 50px;
+    padding: 10px 24px;
+    max-width: fit-content;
+    margin: 16px auto 0 auto;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-light);
+  }
+  .competitor-badge span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .competitor-badge .badge-val {
+    color: var(--gold);
+  }
+  .competitor-badge .badge-sep {
+    color: rgba(255,255,255,0.15);
+  }
+
+  .divider {
+    height: 2px;
+    width: 180px;
+    background: var(--gold-grad);
+    margin: 12px auto 0 auto;
+    border-radius: 5px;
+    box-shadow: var(--shadow-gold);
+  }
+
+  /* Grid Layout */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 310px;
+    gap: 28px;
+  }
+  @media(max-width: 992px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Game Board Area */
+  .game-area {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(15, 23, 50, 0.7);
+    padding: 12px 24px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.05);
+    backdrop-filter: blur(12px);
+  }
+
+  .qcount {
+    color: var(--text-light);
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .qcount::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: var(--shadow-gold);
+  }
+
+  .timer-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .timer-ring {
+    position: relative;
+    width: 48px;
+    height: 48px;
+  }
+  .timer-ring svg {
+    transform: rotate(-90deg);
+    width: 48px;
+    height: 48px;
+  }
+  .timer-ring circle {
+    fill: none;
+    stroke-width: 4;
+  }
+  .timer-ring .bg {
+    stroke: rgba(255,255,255,0.1);
+  }
+  .timer-ring .progress-bar {
+    stroke: var(--gold);
+    stroke-dasharray: 138; /* 2 * PI * r (r=22) */
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear, stroke var(--transition);
+  }
+  .timer-ring .progress-bar.warn {
+    stroke: var(--red);
+    animation: ringPulse 0.5s infinite alternate;
+  }
+
+  @keyframes ringPulse {
+    100% { filter: drop-shadow(0 0 6px var(--red)); }
+  }
+
+  .timer-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-text.warn {
+    color: var(--red);
+  }
+
+  /* Question Card */
+  .qcard-container {
+    position: relative;
+    border-radius: 24px;
+    padding: 2px;
+    background: linear-gradient(180deg, rgba(243, 198, 79, 0.4) 0%, rgba(243, 198, 79, 0.05) 100%);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  }
+
+  .qcard {
+    background: var(--card-bg);
+    border-radius: 22px;
+    padding: 40px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .qcard::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .qmeta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    font-weight: 700;
+    border-bottom: 1px dashed rgba(243, 198, 79, 0.2);
+    padding-bottom: 12px;
+  }
+
+  .qscore {
+    background: rgba(243, 198, 79, 0.15);
+    padding: 4px 14px;
+    border-radius: 50px;
+    border: 1px solid rgba(243, 198, 79, 0.3);
+    font-size: 13px;
+    box-shadow: inset 0 0 10px rgba(243, 198, 79, 0.1);
+  }
+
+  .qtext {
+    font-size: clamp(20px, 2.8vw, 28px);
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--text-light);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+
+  /* Options Grid */
+  .opts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media(max-width: 640px) {
+    .opts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .opt-btn {
+    position: relative;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+    width: 100%;
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .opt-btn:hover:not([disabled]) {
+    transform: translateY(-2px);
+  }
+
+  .opt-btn[disabled] {
+    cursor: not-allowed;
+  }
+
+  .opt-btn.hidden {
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  .opt-frame {
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
+    border-radius: 16px;
+    transition: var(--transition);
+  }
+
+  .opt-btn:hover:not([disabled]) .opt-frame {
+    background: var(--gold-grad);
+    box-shadow: var(--shadow-gold);
+  }
+
+  .opt-inner {
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #131a3d 0%, #090e28 100%);
+    border-radius: 14px;
+    text-align: right;
+    transition: var(--transition);
+  }
+
+  .opt-badge {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--gold);
+    font-weight: 900;
+    font-size: 16px;
+    transition: var(--transition);
+  }
+
+  .opt-btn:hover:not([disabled]) .opt-badge {
+    background: var(--gold-grad);
+    color: #0d1535;
+    border-color: transparent;
+  }
+
+  .opt-text {
+    flex: 1;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--text-light);
+  }
+
+  /* Interactive States */
+  /* Selected Suspense State */
+  .opt-btn.selected .opt-frame {
+    background: var(--gold-grad);
+    animation: goldPulse 1s infinite alternate;
+  }
+  .opt-btn.selected .opt-inner {
+    background: linear-gradient(135deg, #5c4413 0%, #2b1f06 100%);
+  }
+  .opt-btn.selected .opt-badge {
+    background: var(--gold-grad);
+    color: #0d1535;
+  }
+
+  @keyframes goldPulse {
+    0% { box-shadow: 0 0 10px rgba(243, 198, 79, 0.5); }
+    100% { box-shadow: 0 0 25px rgba(243, 198, 79, 0.9); }
+  }
+
+  /* Correct State */
+  .opt-btn.correct .opt-frame {
+    background: var(--green-grad);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.8);
+  }
+  .opt-btn.correct .opt-inner {
+    background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+  }
+  .opt-btn.correct .opt-badge {
+    background: var(--green-grad);
+    color: #fff;
+    border-color: transparent;
+  }
+
+  /* Wrong State */
+  .opt-btn.wrong .opt-frame {
+    background: var(--red-grad);
+    box-shadow: 0 0 30px rgba(244, 63, 94, 0.8);
+  }
+  .opt-btn.wrong .opt-inner {
+    background: linear-gradient(135deg, #4c0519 0%, #881337 100%);
+  }
+  .opt-btn.wrong .opt-badge {
+    background: var(--red-grad);
+    color: #fff;
+    border-color: transparent;
+  }
+
+  /* Lifelines Panel */
+  .lifelines {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .lifeline-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .lifeline-btn:hover:not([disabled]) {
+    transform: translateY(-4px);
+  }
+
+  .lifeline-btn[disabled] {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+
+  .lifeline-btn .ll-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #15224e 0%, #0b1230 100%);
+    border: 1px solid rgba(243, 198, 79, 0.3);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lifeline-btn .ll-inner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent);
+    pointer-events: none;
+  }
+
+  .lifeline-btn:hover:not([disabled]) .ll-inner {
+    border-color: var(--gold);
+    box-shadow: var(--shadow-gold);
+  }
+
+  .lifeline-btn .ll-icon {
+    font-size: 20px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+
+  .lifeline-btn .ll-text {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--gold);
+  }
+
+  .lifeline-btn[disabled] .ll-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+
+  /* Aside: Prize Ladder */
+  aside .ladder-container {
+    background: rgba(13, 20, 48, 0.85);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(243, 198, 79, 0.2);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    position: sticky;
+    top: 24px;
+  }
+
+  aside h2 {
+    text-align: center;
+    color: var(--gold);
+    font-weight: 900;
+    font-size: 18px;
+    margin-bottom: 16px;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 12px;
+  }
+
+  .ladder-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .ladder-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    background: rgba(255,255,255,0.02);
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    transition: var(--transition);
+    border: 1px solid transparent;
+  }
+
+  .ladder-item.safe {
+    background: rgba(243, 198, 79, 0.08);
+    color: var(--gold);
+    border: 1px dashed rgba(243, 198, 79, 0.3);
+  }
+
+  .ladder-item.passed {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--green);
+  }
+
+  .ladder-item.current {
+    background: var(--gold-grad);
+    color: #050714;
+    transform: scale(1.05);
+    box-shadow: var(--shadow-gold);
+    border: 1px solid #ffffff;
+    font-weight: 900;
+    position: relative;
+  }
+
+  .ladder-item.current .star-pointer {
+    position: absolute;
+    left: 12px;
+    animation: bounceStar 0.8s infinite alternate;
+  }
+
+  @keyframes bounceStar {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-4px); }
+  }
+
+  .ladder-actions {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-primary {
+    padding: 14px;
+    border-radius: 50px;
+    background: var(--gold-grad);
+    color: #050714;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 15px;
+    box-shadow: var(--shadow-gold);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(243, 198, 79, 0.5);
+  }
+
+  .btn-ghost {
+    padding: 12px;
+    border-radius: 50px;
+    background: transparent;
+    color: var(--gold);
+    font-weight: 700;
+    border: 1px solid rgba(243, 198, 79, 0.4);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-ghost:hover {
+    background: rgba(243, 198, 79, 0.1);
+    border-color: var(--gold);
+  }
+
+  /* Interactive Popups */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(3, 5, 15, 0.85);
+    backdrop-filter: blur(15px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .popup-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .popup-card {
+    position: relative;
+    max-width: 500px;
+    width: 100%;
+    padding: 2px;
+    border-radius: 28px;
+    background: var(--gold-grad);
+    transform: scale(0.9) translateY(30px);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  }
+
+  .popup-overlay.active .popup-card {
+    transform: scale(1) translateY(0);
+  }
+
+  .popup-inner {
+    background: #0f173b;
+    border-radius: 26px;
+    padding: 36px 30px;
+    text-align: center;
+  }
+
+  .popup-header-icon {
+    width: 70px;
+    height: 70px;
+    background: rgba(243, 198, 79, 0.1);
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px auto;
+    font-size: 32px;
+    box-shadow: var(--shadow-gold);
+  }
+
+  .popup-title {
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 14px;
+    background: var(--gold-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .popup-body {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text-light);
+    margin-bottom: 24px;
+  }
+
+  /* Audiences Vote bar stylings */
+  .audience-box {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .vote-bar-row {
+    text-align: right;
+  }
+
+  .vote-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .vote-label {
+    color: var(--text-light);
+  }
+
+  .vote-percentage {
+    color: var(--gold);
+  }
+
+  .vote-track {
+    height: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .vote-fill {
+    height: 100%;
+    background: var(--gold-grad);
+    border-radius: 50px;
+    width: 0%;
+    transition: width 1.2s cubic-bezier(0.1, 0.8, 0.3, 1);
+  }
+
+  /* Entrance Animations */
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Sound Controls Button */
+  .sound-control {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 50;
+  }
+</style>
 </head>
 <body>
-<div class="cloud cloud1"></div>
-<div class="cloud cloud2"></div>
-<div class="cloud cloud3"></div>
-<div class="floating-icon" style="top: 12%; left: 8%;"><i class="fas fa-sun"></i></div>
-<div class="floating-icon" style="top: 70%; left: 85%;"><i class="fas fa-cloud-rain"></i></div>
-<div class="floating-icon" style="top: 40%; left: 15%;"><i class="fas fa-snowflake"></i></div>
-<div class="floating-icon" style="top: 80%; left: 30%;"><i class="fas fa-wind"></i></div>
 
-<div class="game-container">
-    <div class="characters">
-        <div class="character" id="character1">
-            <div style="background:#EFD2A8; border-radius:50%; width:48px;height:48px; display: flex; align-items:center; justify-content:center;"><i class="fas fa-child" style="font-size: 32px; color:#8b5a2b;"></i></div>
-            <span>Ahmed 🇸🇦</span>
-        </div>
-        <div class="character" id="character2">
-            <div style="background:#EFD2A8; border-radius:50%; width:48px;height:48px; display: flex; align-items:center; justify-content:center;"><i class="fas fa-user-graduate" style="font-size: 32px; color:#8b5a2b;"></i></div>
-            <span>Layla ✨</span>
-        </div>
+<!-- Interactive Particle Stars BG -->
+<canvas id="particles-canvas"></canvas>
+
+<div class="stage">
+  <div class="spotlight blue"></div>
+  <div class="spotlight gold"></div>
+
+  <!-- Welcome / Login Screen -->
+  <div class="welcome-container" id="welcome-screen">
+    <div class="welcome-card">
+      <div class="welcome-inner">
+        <div class="popup-header-icon" style="margin-bottom: 12px;">🏆</div>
+        <h1 style="background: linear-gradient(to bottom, #ffffff 10%, #fdf0cd 40%, #f3c64f 80%, #9e7515 100%); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 900; font-size: 34px;">الخوارزمي الصغير</h1>
+        <p class="welcome-sub">بوابة النخبة والعباقرة في مسابقة الرياضيات الكبرى</p>
+        
+        <form class="welcome-form" id="welcomeForm" onsubmit="event.preventDefault();">
+          <div class="form-group">
+            <label for="studentNameInput">👤 اسم المتسابق الثنائي:</label>
+            <input type="text" id="studentNameInput" required placeholder="مثال: يزن حمدي" autocomplete="off" />
+          </div>
+          
+          <div class="form-group">
+            <label for="studentGradeInput">🏫 الصف الدراسي:</label>
+            <input type="text" id="studentGradeInput" value="خامس" placeholder="الصف" autocomplete="off" />
+          </div>
+          
+          <div class="form-group">
+            <label for="studentSchoolInput">🕌 اسم المدرسة:</label>
+            <input type="text" id="studentSchoolInput" value="الحصان النموذجية" placeholder="المدرسة" autocomplete="off" />
+          </div>
+          
+          <button type="button" class="btn-primary" style="margin-top: 10px;" id="startChallengeBtn">🎯 ابدأ التحدي الكبير</button>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <div class="cube-stage" id="cubeContainer"></div>
-    <button class="roll-btn" id="rollCubeBtn"><i class="fas fa-dice-d6"></i> ROLL THE CUBE! <i class="fas fa-cloud-sun"></i></button>
+  <!-- Game Main Board -->
+  <main id="game-board">
+    <header>
+      <div class="eyebrow-container">
+        <span class="eyebrow">MILLIONAIRE EDITION • الإصدار الذهبي</span>
+      </div>
+      <h1>الخوارزمي الصغير</h1>
+      
+      <!-- Dynamic Student Info Badge -->
+      <div class="competitor-badge">
+        <span>👤 المتسابق: <strong class="badge-val" id="displayStudentName">-</strong></span>
+        <span class="badge-sep">|</span>
+        <span>🏫 الصف: <strong class="badge-val" id="displayStudentGrade">-</strong></span>
+        <span class="badge-sep">|</span>
+        <span>🕌 المدرسة: <strong class="badge-val" id="displayStudentSchool">-</strong></span>
+      </div>
+      
+      <div class="divider"></div>
+      <p class="subtitle" style="margin-top: 16px;">مسابقة الرياضيات الكبرى المشوقة • <span class="g">إعداد:</span> يزن حمدي • <span class="g">إشراف:</span> أ. محمد رجب</p>
+    </header>
 
-    <div class="activity-panel" id="activityPanel">
-        <div class="activity-header">
-            <h2><i class="fas fa-magic"></i> <span id="activityTitle">Weather Challenge</span></h2>
-            <div class="badge-area">
-                <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
-                <span id="xpPoints">0 XP</span>
-                <div class="badge-icon" id="badgeIcon" title="Earn stickers!"><i class="fas fa-star-of-life"></i>⭐</div>
+    <div class="layout">
+      <!-- Game Area -->
+      <section class="game-area">
+        <div class="topbar">
+          <span class="qcount" id="qcount">جاري التحميل...</span>
+          <div class="timer-container">
+            <div class="timer-ring">
+              <svg>
+                <circle class="bg" cx="24" cy="24" r="22"></circle>
+                <circle class="progress-bar" id="progressBar" cx="24" cy="24" r="22"></circle>
+              </svg>
+              <span class="timer-text" id="timer">45</span>
             </div>
+          </div>
         </div>
-        <div id="activityContent" class="activity-content">✨ Roll the cube to start learning! ✨</div>
-        <div id="feedbackMsg" style="margin-top: 12px; font-weight: bold; text-align: center;"></div>
+
+        <div class="qcard-container">
+          <div class="qcard" id="qcard">
+            <div class="qmeta">
+              <span id="qnum">السؤال</span>
+              <span class="qscore" id="qscore">1,000 نقطة</span>
+            </div>
+            <p class="qtext" id="qtext">تحميل السؤال...</p>
+          </div>
+        </div>
+
+        <div class="opts-grid" id="opts">
+          <!-- Options will be generated here -->
+        </div>
+
+        <div class="lifelines">
+          <button class="lifeline-btn" id="ll50" title="حذف إجابتين">
+            <div class="ll-inner">
+              <span class="ll-icon">🎯</span>
+              <span class="ll-text">50 : 50</span>
+            </div>
+          </button>
+          <button class="lifeline-btn" id="llFriend" title="اتصال بصديق">
+            <div class="ll-inner">
+              <span class="ll-icon">📞</span>
+              <span class="ll-text">اتصل بصديق</span>
+            </div>
+          </button>
+          <button class="lifeline-btn" id="llAud" title="رأي الجمهور">
+            <div class="ll-inner">
+              <span class="ll-icon">👥</span>
+              <span class="ll-text">رأي الجمهور</span>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Sidebar Area -->
+      <aside>
+        <div class="ladder-container">
+          <h2>سلم الجوائز النقاطي</h2>
+          <ol class="ladder-list" id="ladder"></ol>
+          <div class="ladder-actions">
+            <button class="btn-primary" id="resetBtn">🔄 إعادة تشغيل المسابقة</button>
+            <button class="btn-ghost" id="muteBtn">🔊 تشغيل الموسيقى والآثار</button>
+          </div>
+        </div>
+      </aside>
     </div>
-    <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 15px;">
-        <button id="dayNightToggle"><i class="fas fa-moon"></i> Night mode</button>
-        <button id="musicToggle"><i class="fas fa-volume-up"></i> Sound FX</button>
+  </main>
+
+  <!-- Interactive Overlays & Modals -->
+  <div class="popup-overlay" id="popup">
+    <div class="popup-card">
+      <div class="popup-inner">
+        <div class="popup-header-icon" id="popupIcon">💡</div>
+        <h3 class="popup-title" id="popupTitle">تنبيه</h3>
+        <div class="popup-body" id="popupBody">المحتوى هنا</div>
+        <button class="btn-primary" style="margin: 0 auto; width: 60%;" id="popupBtn">موافق</button>
+      </div>
     </div>
+  </div>
 </div>
 
-<script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+<script>
+// Game State Constants
+const LETTERS = ["أ", "ب", "ج", "د"];
+const SCORES = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 300000, 400000, 500000, 600000, 800000, 900000, 1000000];
+const SAFE_LEVELS = new Set([4, 9]); // Q5 (10,000) and Q10 (300,000) are milestones
+const QUESTION_TIME = 45; // 45 seconds per question
 
-    // ---------- setup 3D cube ----------
-    const container = document.getElementById('cubeContainer');
-    const scene = new THREE.Scene();
-    scene.background = null; // transparent
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-    camera.position.set(2, 1.8, 3);
-    camera.lookAt(0,0,0);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    container.appendChild(renderer.domElement);
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.autoRotate = false;
-    controls.enableZoom = true;
-    controls.enablePan = false;
-    controls.rotateSpeed = 2;
+function fr(n, d) {
+  const m = {
+    "1/2": "½ (نصف)", "1/3": "⅓ (ثلث)", "1/4": "¼ (ربع)", "1/5": "⅕ (خمس)", 
+    "1/6": "⅙ (سدس)", "1/8": "⅛ (ثمن)", "2/3": "⅔ (ثلثان)", "2/4": "²⁄₄ (ربعان)", 
+    "3/4": "¾ (ثلاثة أرباع)", "2/5": "²⁄₅ (خمسان)", "3/5": "³⁄₅ (ثلاثة أخماس)", 
+    "4/5": "⁴⁄₅ (أربعة أخماس)", "3/8": "³⁄₈ (ثلاثة أثمان)", "5/8": "⁵⁄₈ (خمسة أثمان)", 
+    "7/8": "⁷⁄₈ (سبعة أثمان)", "2/6": "²⁄₆ (سدسان)", "4/6": "⁴⁄₆ (أربعة أسداس)", 
+    "5/6": "⁵⁄₆ (خمسة أسداس)", "3/10": "³⁄₁₀ (ثلاثة أعشار)", "7/10": "⁷⁄₁₀ (سبعة أعشار)", 
+    "9/10": "⁹⁄₁₀ (تسعة أعشار)"
+  };
+  return m[n + "/" + d] || (n + "⁄" + d);
+}
 
-    // lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(2, 5, 3);
-    scene.add(dirLight);
-    const backLight = new THREE.PointLight(0xffaa66, 0.4);
-    backLight.position.set(-1, 1, -2);
-    scene.add(backLight);
+// Math Questions Bank with distinct difficulties
+const BANK = [
+  { text: "ما الكسر الذي يمثل الجزء الملوّن إذا قُسم المستطيل إلى 4 أجزاء متطابقة وظلل جزء واحد؟", options: [fr(1, 4), fr(2, 4), fr(3, 4), "1 (واحد كامل)"], correct: fr(1, 4), difficulty: 1 },
+  { text: "ما الكسر الذي يمثل الجزء المظلل في الدائرة المقسمة إلى 4 أجزاء وظلل منها جزء واحد؟", options: [fr(1, 4), fr(2, 4), fr(3, 4), "1 كامل"], correct: fr(1, 4), difficulty: 1 },
+  { text: "اكتب الكسر الآتي بالرموز الرياضية: ثلاثة من خمسة", options: [fr(2, 5), fr(3, 5), fr(4, 5), fr(1, 5)], correct: fr(3, 5), difficulty: 1 },
+  { text: "اكتب الكسر الرياضي المعبر عن: خمسة أسباع", options: ["⁵⁄₆", "⁵⁄₇", "⁵⁄₈", "⁵⁄₉"], correct: "⁵⁄₇", difficulty: 1 },
+  { text: "ما الكسر الذي يمثل أربعة أسداس في الخيارات التالية؟", options: [fr(4, 5), fr(4, 6), "⁴⁄₇", "⁴⁄₈"], correct: fr(4, 6), difficulty: 1 },
+  { text: "أكلت منيرة ⅗ التفاحة وأكلت أختها ⅕ التفاحة، فكم أكلت البنتان معًا؟", options: [fr(4, 5), fr(3, 5), fr(2, 5), fr(1, 5)], correct: fr(4, 5), difficulty: 2 },
+  { text: "لدى محمد 8 سمكات ملونة، منها 4 خضراء. ما الكسر المعبر عن السمك الأخضر؟", options: ["⁴⁄₈", "²⁄₈", "⁶⁄₈", "⅛"], correct: "⁴⁄₈", difficulty: 1 },
+  { text: "ما الكسر المكافئ لكسر ⁴⁄₈ في أبسط صورة؟", options: [fr(1, 2), fr(1, 4), fr(3, 4), fr(2, 3)], correct: fr(1, 2), difficulty: 2 },
+  { text: "أي من الكسور التالية يعتبر كسرًا مكافئًا لـ ⅓ ؟", options: [fr(2, 6), fr(2, 3), fr(3, 4), fr(1, 2)], correct: fr(2, 6), difficulty: 2 },
+  { text: "ما هي العلاقة الرياضية الصحيحة للمقارنة بين ⅜ و ⅝ ؟", options: ["⅜ > ⅝", "⅜ < ⅝", "⅜ = ⅝", "لا يمكن المقارنة"], correct: "⅜ < ⅝", difficulty: 2 },
+  { text: "أي القطعتين تعتبر الأطول هندسياً: قطعة طولها ½ متر أم ¼ متر؟", options: ["½ متر", "¼ متر", "متساويان في الطول", "لا توجد علاقة"], correct: "½ متر", difficulty: 1 },
+  { text: "اشترى إبراهيم ⁹⁄₁₀ كيلو جبن أبيض و ⁶⁄₁₀ كيلو جبن أصفر. كم تزيد كمية الجبن الأبيض؟", options: ["³⁄₁₀", "²⁄₁₀", "⁴⁄₁₀", "¹⁄₁₀"], correct: "³⁄₁₀", difficulty: 2 },
+  { text: "في قفص 15 طائرًا، ثلثها ببغاوات، وطائران هدهد، والباقي حسون. فكم عدد الحسون؟", options: ["8", "7", "6", "5"], correct: "8", difficulty: 3 },
+  { text: "نسخ حسن 120 برنامجًا تعليمياً في 10 أيام بالتساوي. كم برنامجًا ينسخ في اليوم الواحد؟", options: ["10", "12", "15", "20"], correct: "12", difficulty: 1 },
+  { text: "فطيرة مقسمة 8 قطع متساوية، أكل محمد قطعة واحدة منها. ما الكسر المعبر عن المتبقي؟", options: ["⁷⁄₈", "⁶⁄₈", "⁵⁄₈", "⁴⁄₈"], correct: "⁷⁄₈", difficulty: 1 },
+  { text: "زرع أحمد ⅕ الحديقة وزرع شقيقه فهد ⅗ الحديقة. ما الكسر الإجمالي لما زرعاه؟", options: [fr(4, 5), fr(3, 5), fr(2, 5), fr(1, 5)], correct: fr(4, 5), difficulty: 2 },
+  { text: "احسب ناتج الجمع التالي في أبسط صورة ممكنة: ⅕ + ⅗", options: [fr(4, 5), fr(3, 5), fr(2, 5), fr(1, 5)], correct: fr(4, 5), difficulty: 1 },
+  { text: "ما هو ناتج الطرح الحسابي التالي: ⅞ - ⁴⁄₈ ؟", options: ["³⁄₈", "⁴⁄₈", "⁵⁄₈", "²⁄₈"], correct: "³⁄₈", difficulty: 2 },
+  { text: "أي الكسرين يمثل كمية أو قيمة أكبر رياضياً: ⅓ أم ⅙ ؟", options: ["⅓", "⅙", "متساويان تماماً", "لا يمكن التحديد"], correct: "⅓", difficulty: 2 },
+  { text: "ماذا يمثل المفهوم الرياضي لـ (المقام) في الكسر الاعتيادي ⅗ ؟", options: ["عدد الأجزاء الكلية المتطابقة", "عدد الأجزاء المظلله فقط", "الناتج المتبقي من الطرح", "الفرق النسبي بين الأعداد"], correct: "عدد الأجزاء الكلية المتطابقة", difficulty: 1 },
+  { text: "رتب الكسور التالية ترتيباً تصاعدياً صحيحاً: ½ , ⅔ , ⁷⁄₁₂", options: ["½ , ⁷⁄₁₂ , ⅔", "⅔ , ½ , ⁷⁄₁₂", "⁷⁄₁₂ , ½ , ⅔", "½ , ⅔ , ⁷⁄₁₂"], correct: "½ , ⁷⁄₁₂ , ⅔", difficulty: 3 },
+  { text: "لدى شركة سيارات 24 مركبة، منها 6 مركبات خضراء. ما الكسر الدال على السيارات الخضراء？", options: ["⁶⁄₂₄", "⁴⁄₂₄", "⁸⁄₂₄", "⁵⁄₂₄"], correct: "⁶⁄₂₄", difficulty: 1 },
+  { text: "مزرعة بها 16 حيواناً، ربعها خراف، و5 منها ماعز، والباقي دجاج. كم عدد الدجاج؟", options: ["4", "5", "6", "7"], correct: "7", difficulty: 3 },
+  { text: "إذا علمنا أن ثلث طيور المحمية ببغاوات وكان إجمالي الطيور 24، فكم عدد الببغاوات؟", options: ["6", "8", "10", "12"], correct: "8", difficulty: 2 },
+  { text: "أي من الكسور التالية يكافئ رياضياً الكسر الاعتيادي ¾ ؟", options: ["⁶⁄₈", "⅔", "⅚", "⅞"], correct: "⁶⁄₈", difficulty: 2 }
+];
 
-    // texture generator for weather icons
-    function makeIconTexture(iconType, color) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 512;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#fff9ef';
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = color;
-        ctx.font = `Bold ${canvas.width * 0.4}px "Font Awesome 6 Free", "Segoe UI Emoji"`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        let symbol = '';
-        switch(iconType){
-            case 'sun': symbol = '☀️'; ctx.fillStyle = '#FFD966'; break;
-            case 'cloud': symbol = '☁️'; ctx.fillStyle = '#B0C4DE'; break;
-            case 'rain': symbol = '🌧️'; ctx.fillStyle = '#5DADE2'; break;
-            case 'snow': symbol = '❄️'; ctx.fillStyle = '#AED6F1'; break;
-            case 'rainbow': symbol = '🌈'; ctx.fillStyle = '#FFB347'; break;
-            case 'wind': symbol = '💨'; ctx.fillStyle = '#AAB7B8'; break;
-        }
-        ctx.fillText(symbol, canvas.width/2, canvas.height/2);
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 8;
-        ctx.strokeRect(10,10,canvas.width-20,canvas.height-20);
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.needsUpdate = true;
-        return texture;
+function shuffle(array) {
+  let arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Draw 15 graduated questions
+function prepareQuestions() {
+  const easy = BANK.filter(q => q.difficulty === 1);
+  const medium = BANK.filter(q => q.difficulty === 2);
+  const hard = BANK.filter(q => q.difficulty === 3);
+  
+  // 5 easy, 5 medium, 5 hard
+  let selected = [
+    ...shuffle(easy).slice(0, 5),
+    ...shuffle(medium).slice(0, 5),
+    ...shuffle(hard).slice(0, 5)
+  ];
+  
+  // Fillers in case bank doesn't have enough
+  while (selected.length < 15) {
+    selected.push(BANK[Math.floor(Math.random() * BANK.length)]);
+  }
+  return selected.slice(0, 15);
+}
+
+/* ==========================================================
+   ADVANCED SYNTHESIZED SOUND SYSTEM (Web Audio API)
+   Generates professional TV quiz atmospheric audio & sound design
+============================================================ */
+let audioCtx = null;
+let musicInterval = null;
+let soundEnabled = false; 
+let heartbeatOsc = null;
+let heartbeatGain = null;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+// Play custom sound effects
+function playTone(freqs, duration, type = 'sine', volume = 0.15, delay = 0) {
+  if (!soundEnabled) return;
+  initAudio();
+  
+  const time = audioCtx.currentTime + delay;
+  const osc = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  
+  osc.type = type;
+  
+  if (Array.isArray(freqs)) {
+    // Frequency sweeps
+    osc.frequency.setValueAtTime(freqs[0], time);
+    osc.frequency.exponentialRampToValueAtTime(freqs[1], time + duration);
+  } else {
+    osc.frequency.setValueAtTime(freqs, time);
+  }
+  
+  gainNode.gain.setValueAtTime(0.001, time);
+  gainNode.gain.exponentialRampToValueAtTime(volume, time + 0.05);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, time + duration - 0.01);
+  
+  osc.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  
+  osc.start(time);
+  osc.stop(time + duration);
+}
+
+// Atmospheric Suspense Sound generator
+function playSuspenseAmbient() {
+  if (!soundEnabled) return;
+  initAudio();
+  
+  // Root bass drone
+  const bassFreq = 55 + (level * 2.5); // Frequency increases as level goes up!
+  playTone([bassFreq, bassFreq - 2], 3.5, 'triangle', 0.08);
+  playTone([bassFreq * 1.5, bassFreq * 1.5 + 1], 3.5, 'sine', 0.05);
+}
+
+// Synthesize continuous heartbeat sound for countdown
+function startHeartbeat() {
+  if (!soundEnabled) return;
+  initAudio();
+  if (heartbeatOsc) stopHeartbeat();
+
+  heartbeatOsc = audioCtx.createOscillator();
+  heartbeatGain = audioCtx.createGain();
+  
+  heartbeatOsc.type = 'sine';
+  heartbeatOsc.frequency.setValueAtTime(60, audioCtx.currentTime);
+  
+  heartbeatGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+  heartbeatOsc.connect(heartbeatGain);
+  heartbeatGain.connect(audioCtx.destination);
+  heartbeatOsc.start();
+  
+  // Custom modulation loop for heartbeat double thumps
+  const heartbeatLoop = setInterval(() => {
+    if (!soundEnabled || !heartbeatGain) {
+      clearInterval(heartbeatLoop);
+      return;
     }
+    const t = audioCtx.currentTime;
+    
+    // First thump
+    heartbeatGain.gain.setValueAtTime(0.12, t);
+    heartbeatGain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+    
+    // Second thump
+    heartbeatGain.gain.setValueAtTime(0.08, t + 0.2);
+    heartbeatGain.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+  }, timeLeft <= 10 ? 500 : 1000);
+}
 
-    const materials = [
-        new THREE.MeshStandardMaterial({ map: makeIconTexture('sun', '#FFD966'), roughness: 0.2, metalness: 0.7 }),  // front
-        new THREE.MeshStandardMaterial({ map: makeIconTexture('cloud', '#B0C4DE'), roughness: 0.2, metalness: 0.7 }),
-        new THREE.MeshStandardMaterial({ map: makeIconTexture('rain', '#5DADE2'), roughness: 0.2, metalness: 0.7 }),
-        new THREE.MeshStandardMaterial({ map: makeIconTexture('snow', '#AED6F1'), roughness: 0.2, metalness: 0.7 }),
-        new THREE.MeshStandardMaterial({ map: makeIconTexture('rainbow', '#FFB347'), roughness: 0.2, metalness: 0.7 }),
-        new THREE.MeshStandardMaterial({ map: makeIconTexture('wind', '#AAB7B8'), roughness: 0.2, metalness: 0.7 })
-    ];
-    const geometry = new THREE.BoxGeometry(1.2, 1.2, 1.2);
-    const cube = new THREE.Mesh(geometry, materials);
-    scene.add(cube);
+function stopHeartbeat() {
+  if (heartbeatOsc) {
+    try { heartbeatOsc.stop(); } catch(e){}
+    heartbeatOsc = null;
+  }
+  heartbeatGain = null;
+}
 
-    function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
-    }
-    animate();
-    window.addEventListener('resize', () => {
-        const w = container.clientWidth, h = container.clientHeight;
-        camera.aspect = w/h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
+// SFX Triggers
+const SoundEffects = {
+  tick: () => playTone([1200, 1000], 0.08, 'sine', 0.08),
+  intro: () => {
+    playTone(220, 0.4, 'sawtooth', 0.08);
+    playTone(330, 0.5, 'sawtooth', 0.07, 0.1);
+    playTone(440, 0.6, 'sine', 0.06, 0.2);
+    playTone(554.37, 0.8, 'sine', 0.05, 0.3);
+  },
+  clickOption: () => playTone([440, 330], 0.25, 'triangle', 0.15),
+  correctAnswer: () => {
+    stopHeartbeat();
+    const chords = [261.63, 329.63, 392.00, 523.25]; // C major chord
+    chords.forEach((f, i) => {
+      playTone([f, f * 2], 0.8, 'triangle', 0.1, i * 0.1);
     });
-
-    // ----- game state -----
-    let currentActivity = null;
-    let xp = 0;
-    let soundEnabled = true;
-    let dayMode = true;
-    const xpFill = document.getElementById('xpFill');
-    const xpPointsSpan = document.getElementById('xpPoints');
-    const badgeIconDiv = document.getElementById('badgeIcon');
-    let stickersUnlocked = 0;
-
-    function playSound(type) {
-        if(!soundEnabled) return;
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.type = 'sine';
-        let freq = type === 'correct' ? 880 : 440;
-        osc.frequency.value = freq;
-        gain.gain.value = 0.2;
-        osc.start();
-        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
-        osc.stop(audioCtx.currentTime + 0.3);
-    }
-
-    function addXP(amount) {
-        xp += amount;
-        xpPointsSpan.innerText = xp + " XP";
-        let percent = Math.min(100, (xp % 200) / 2);
-        xpFill.style.width = percent + "%";
-        if(Math.floor(xp/200) > stickersUnlocked) {
-            stickersUnlocked++;
-            badgeIconDiv.innerHTML = `<i class="fas fa-award"></i>🌟 x${stickersUnlocked}`;
-            document.getElementById('feedbackMsg').innerHTML = "🎉 NEW BADGE UNLOCKED! 🎉";
-            setTimeout(()=>{ if(currentActivity) showFeedback(''); }, 1500);
-        }
-        if(amount>0) playSound('correct');
-    }
-
-    function showFeedback(msg, isError=false) {
-        const fbDiv = document.getElementById('feedbackMsg');
-        fbDiv.innerHTML = isError ? `❌ ${msg}` : `✅ ${msg}`;
-        fbDiv.style.color = isError ? '#c0392b' : '#2c7a1f';
-        setTimeout(() => {
-            if(document.getElementById('feedbackMsg').innerHTML === fbDiv.innerHTML) fbDiv.innerHTML = '';
-        }, 2000);
-    }
-
-    function speakWord(word) {
-        if(!window.speechSynthesis) return;
-        const utterance = new SpeechSynthesisUtterance(word);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.9;
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utterance);
-    }
-
-    function confettiEffect() {
-        import('https://cdn.skypack.dev/canvas-confetti').then(module => {
-            module.default({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#ffd966', '#5dade2', '#f1948a'] });
-        }).catch(()=>{});
-    }
-
-    // Activities Definitions
-    const activities = [
-        { name: '🌞 Vocabulary Challenge', load: (containerDiv) => vocabChallenge(containerDiv) },
-        { name: '📚 Grammar - "be going to"', load: (containerDiv) => grammarChallenge(containerDiv) },
-        { name: '🎡 Weather Wheel Spinner', load: (containerDiv) => weatherWheel(containerDiv) },
-        { name: '🎮 Mini Weather Game', load: (containerDiv) => miniGame(containerDiv) },
-        { name: '📖 Story Adventure', load: (containerDiv) => storyAdventure(containerDiv) },
-        { name: '❓ Mystery Question', load: (containerDiv) => mysterySide(containerDiv) }
-    ];
-
-    function rollRandomActivity() {
-        const randomIndex = Math.floor(Math.random() * activities.length);
-        currentActivity = randomIndex;
-        document.getElementById('activityTitle').innerHTML = activities[randomIndex].name;
-        const contentDiv = document.getElementById('activityContent');
-        contentDiv.innerHTML = '<div style="text-align:center;">🌀 Loading game...</div>';
-        activities[randomIndex].load(contentDiv);
-        // Animate cube roll (rotation shuffle)
-        const randomRot = { x: Math.random() * Math.PI * 2, y: Math.random() * Math.PI * 2, z: Math.random() * Math.PI * 0.5 };
-        cube.rotation.x = randomRot.x;
-        cube.rotation.y = randomRot.y;
-        cube.rotation.z = randomRot.z;
-        playSound('correct'); // roll sound effect
-    }
-
-    // Vocabulary challenge using lesson words
-    function vocabChallenge(div) {
-        const vocab = ['sunny', 'rainy', 'cloudy', 'windy', 'snow', 'rainbow', 'hot', 'cold', 'season', 'weather', 'warm', 'cool'];
-        const randomWord = vocab[Math.floor(Math.random() * vocab.length)];
-        const definitions = { sunny: '☀️ bright sun', rainy: '🌧️ water drops', cloudy: '☁️ grey sky', windy: '💨 strong air', snow: '❄️ white flakes', rainbow: '🌈 colorful arc', hot: '🔥 high temperature', cold: '🧊 low temperature', season: '🍂 spring, summer...', weather: '⛅ outside condition', warm: '🌡️ pleasant heat', cool: '🍃 fresh air' };
-        div.innerHTML = `
-            <h3>🔊 Vocabulary: <u>${randomWord}</u> <button class="speak-btn" id="speakVocab"><i class="fas fa-volume-up"></i></button></h3>
-            <p>Match the picture!</p>
-            <div class="choice-grid" id="vocabChoices"></div>
-        `;
-        const choices = ['sunny', 'rainy', 'windy', 'snow'].sort(() => 0.5 - Math.random());
-        const grid = div.querySelector('#vocabChoices');
-        choices.forEach(opt => {
-            const btn = document.createElement('div');
-            btn.className = 'option-card';
-            btn.innerHTML = `${opt} ${opt==='sunny'?'☀️':opt==='rainy'?'🌧️':opt==='windy'?'💨':'❄️'}`;
-            btn.onclick = () => {
-                if(opt === randomWord) {
-                    showFeedback(`Great! ${randomWord} is correct! +15 XP`);
-                    addXP(15);
-                    confettiEffect();
-                    vocabChallenge(div);
-                } else {
-                    showFeedback(`Not quite! Try again.`, true);
-                    playSound('wrong');
-                }
-            };
-            grid.appendChild(btn);
-        });
-        document.getElementById('speakVocab')?.addEventListener('click',()=>speakWord(randomWord));
-    }
-
-    function grammarChallenge(div) {
-        const qa = [
-            { q: "It _____ going to rain tomorrow.", correct: "is", options: ["am","is","are"] },
-            { q: "They _____ going to play football.", correct: "are", options: ["is","am","are"] },
-            { q: "What _____ the weather going to be like?", correct: "is", options: ["is","are","am"] },
-            { q: "I _____ going to wear a jacket.", correct: "am", options: ["am","is","are"] }
-        ];
-        const item = qa[Math.floor(Math.random()*qa.length)];
-        div.innerHTML = `<h3>✏️ Complete the sentence:</h3><p style="font-size:1.4rem;">${item.q}</p><div class="choice-grid" id="grammarOptions"></div>`;
-        const optDiv = div.querySelector('#grammarOptions');
-        item.options.forEach(opt => {
-            const btn = document.createElement('div');
-            btn.className = 'option-card';
-            btn.innerText = opt;
-            btn.onclick = () => {
-                if(opt === item.correct) {
-                    showFeedback(`Excellent! "be going to" correct! +15 XP`);
-                    addXP(15);
-                    confettiEffect();
-                    grammarChallenge(div);
-                } else { showFeedback(`Try again! Use "${item.correct}".`, true); playSound('wrong'); }
-            };
-            optDiv.appendChild(btn);
-        });
-    }
-
-    function weatherWheel(div) {
-        const sectors = ['Sunny', 'Rainy', 'Snowy', 'Windy', 'Cloudy', 'Hot'];
-        let spinning = false;
-        div.innerHTML = `<div class="wheel-container"><canvas id="wheelCanvas" width="250" height="250" class="wheel-canvas"></canvas><button id="spinWheel">🎡 SPIN!</button><p id="wheelResult"></p></div>`;
-        const canvas = div.querySelector('#wheelCanvas');
-        const ctx = canvas.getContext('2d');
-        function drawWheel() {
-            const angleStep = (Math.PI * 2)/sectors.length;
-            for(let i=0;i<sectors.length;i++){
-                ctx.beginPath();
-                ctx.fillStyle = `hsl(${i*60}, 70%, 60%)`;
-                ctx.moveTo(125,125);
-                ctx.arc(125,125,125, i*angleStep, (i+1)*angleStep);
-                ctx.fill();
-                ctx.save();
-                ctx.translate(125,125);
-                ctx.rotate(i*angleStep + angleStep/2);
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 16px "Quicksand"';
-                ctx.fillText(sectors[i], 50, 10);
-                ctx.restore();
-            }
-        }
-        drawWheel();
-        document.getElementById('spinWheel').onclick = () => {
-            if(spinning) return;
-            spinning = true;
-            let spins = Math.floor(Math.random() * 20) + 10;
-            let current = 0;
-            const interval = setInterval(()=>{
-                current++;
-                if(current >= spins) {
-                    clearInterval(interval);
-                    const finalIndex = Math.floor(Math.random() * sectors.length);
-                    const weather = sectors[finalIndex];
-                    document.getElementById('wheelResult').innerHTML = `🎉 It's ${weather}! 🎉<br> Say: "It's ${weather}. I'm going to ${weather==='Snowy'?'make a snowman':weather==='Sunny'?'wear sunglasses':weather==='Rainy'?'take an umbrella':'enjoy the day'}." <button id="confirmWheel">Got it ✓</button>`;
-                    document.getElementById('confirmWheel')?.addEventListener('click',()=>{ addXP(10); confettiEffect(); showFeedback("Great future prediction!"); weatherWheel(div); });
-                    spinning = false;
-                } else {
-                    const fake = Math.floor(Math.random() * sectors.length);
-                    ctx.clearRect(0,0,250,250);
-                    drawWheel();
-                }
-            }, 50);
-        };
-    }
-
-    function miniGame(div) {
-        const scenarios = [{ weather: "rainy", item: "umbrella", emoji: "☔"},{ weather: "sunny", item: "sunglasses", emoji: "🕶️"},{ weather: "snowy", item: "jacket", emoji: "🧥"}];
-        const s = scenarios[Math.floor(Math.random()*scenarios.length)];
-        div.innerHTML = `<h3>🌦️ Dress for the weather!</h3><p>It's <strong>${s.weather}</strong>. What do you need?</p><div class="choice-grid" id="gameOptions"></div>`;
-        const opts = [s.item, "flipflops", "book"];
-        const grid = div.querySelector('#gameOptions');
-        opts.forEach(opt => {
-            const btn = document.createElement('div');
-            btn.className = 'option-card';
-            btn.innerHTML = opt === s.item ? `${s.emoji} ${opt}` : opt;
-            btn.onclick = () => {
-                if(opt === s.item) { addXP(15); showFeedback(`Perfect! ${opt} is right!`); confettiEffect(); miniGame(div); }
-                else { showFeedback(`Oops! Not for ${s.weather}.`, true); playSound('wrong');}
-            };
-            grid.appendChild(btn);
-        });
-    }
-
-    function storyAdventure(div) {
-        div.innerHTML = `<h3>🌍 The Weather Dome - Zack, Layla & Mateo</h3><p>In the Weather Dome, it suddenly became rainy! Help Zack pick the right item.</p><div class="choice-grid" id="storyChoices"></div>`;
-        const items = [{name:"Umbrella", correct:true},{name:"Sandwich", correct:false},{name:"Flashlight", correct:false}];
-        const grid = div.querySelector('#storyChoices');
-        items.forEach(it=>{
-            const btn = document.createElement('div');
-            btn.className = 'option-card';
-            btn.innerText = it.name;
-            btn.onclick = () => {
-                if(it.correct) { addXP(20); showFeedback("Zack stays dry! You solved the weather problem!"); confettiEffect(); storyAdventure(div); }
-                else { showFeedback("Not helpful in the rain! Try again.", true); playSound('wrong');}
-            };
-            grid.appendChild(btn);
-        });
-    }
-
-    function mysterySide(div) {
-        const questions = ["What's the weather like today in your city?", "Was it cloudy yesterday?", "What season do you like? Why?", "What happens in Alaska because of global warming?"];
-        const q = questions[Math.floor(Math.random()*questions.length)];
-        div.innerHTML = `<h3>🗣️ Mystery Question</h3><p style="font-size:1.2rem;">${q}</p><textarea id="answerMystery" rows="2" style="width:80%; border-radius:30px; padding:10px;" placeholder="Type your answer..."></textarea><br><button id="submitMystery">Submit & Earn XP</button>`;
-        document.getElementById('submitMystery')?.addEventListener('click',()=>{
-            const ans = document.getElementById('answerMystery').value.trim();
-            if(ans.length>2) { addXP(10); showFeedback("Great thinking! +10 XP!"); confettiEffect(); mysterySide(div);}
-            else showFeedback("Write a short answer!", true);
-        });
-    }
-
-    document.getElementById('rollCubeBtn').addEventListener('click', rollRandomActivity);
-    document.getElementById('dayNightToggle').addEventListener('click',()=>{
-        dayMode = !dayMode;
-        document.body.style.background = dayMode ? 'linear-gradient(145deg, #90d2ff 0%, #c0e4ff 100%)' : 'linear-gradient(145deg, #1e2a3a 0%, #0b1a28 100%)';
-        document.getElementById('dayNightToggle').innerHTML = dayMode ? '<i class="fas fa-moon"></i> Night mode' : '<i class="fas fa-sun"></i> Day mode';
+    // Magical high shimmer
+    setTimeout(() => {
+      playTone([1046.50, 1567.98], 1.2, 'sine', 0.06);
+    }, 400);
+  },
+  wrongAnswer: () => {
+    stopHeartbeat();
+    playTone([180, 90], 1.2, 'sawtooth', 0.2);
+    playTone([140, 70], 1.0, 'square', 0.1, 0.05);
+  },
+  useLifeline: () => {
+    playTone([600, 1200], 0.4, 'sine', 0.12);
+    playTone([800, 1600], 0.5, 'triangle', 0.08, 0.1);
+  },
+  gameWin: () => {
+    stopHeartbeat();
+    // Glorious celebratory orchestration
+    const fanfare = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+    fanfare.forEach((f, i) => {
+      playTone([f, f * 1.5], 1.5, 'triangle', 0.15, i * 0.12);
+      playTone(f * 2, 1.2, 'sine', 0.08, i * 0.12 + 0.1);
     });
-    document.getElementById('musicToggle').addEventListener('click',()=>{
-        soundEnabled = !soundEnabled;
-        document.getElementById('musicToggle').innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i> Sound FX' : '<i class="fas fa-volume-mute"></i> Mute';
+  }
+};
+
+/* ==========================================================
+   GAME LOGIC & STATE ENGINE
+============================================================ */
+let questions = [];
+let level = 0;
+let selectedOption = null;
+let isRevealed = false;
+let isLocked = false;
+let timeLeft = QUESTION_TIME;
+let hiddenOptions = [];
+let usedLifelines = { fifty: false, friend: false, audience: false };
+let gameStatus = 'playing'; // 'playing', 'won', 'lost'
+let countdownTimer = null;
+
+const $ = id => document.getElementById(id);
+
+// Particle system variables
+let canvas, ctx, particles = [];
+
+function initParticles() {
+  canvas = $('particles-canvas');
+  ctx = canvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  
+  // Create stars
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 2 + 0.5,
+      speed: Math.random() * 0.2 + 0.05,
+      opacity: Math.random() * 0.5 + 0.2
     });
-    rollRandomActivity(); // first load
-    // Add celebratory characters happy on correct answers (via feedback above)
-    setInterval(()=>{
-        const c1 = document.getElementById('character1');
-        if(c1) c1.style.transform = 'scale(1.02)';
-        setTimeout(()=>{if(c1) c1.style.transform='scale(1)';},300);
-    }, 5000);
+  }
+  
+  animateParticles();
+}
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    p.y -= p.speed;
+    if (p.y < 0) p.y = canvas.height;
+    ctx.fillStyle = `rgba(243, 198, 79, ${p.opacity})`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  requestAnimationFrame(animateParticles);
+}
+
+function startCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  startHeartbeat();
+  countdownTimer = setInterval(() => {
+    if (gameStatus !== 'playing' || isLocked) return;
+    timeLeft--;
+    
+    if (timeLeft <= 8 && timeLeft > 0) {
+      SoundEffects.tick();
+    }
+    
+    if (timeLeft <= 0) {
+      clearInterval(countdownTimer);
+      handleTimeout();
+    }
+    updateTimerUI();
+  }, 1000);
+}
+
+function updateTimerUI() {
+  $('timer').textContent = String(timeLeft).padStart(2, '0');
+  const bar = $('progressBar');
+  
+  // Calculate dash offset for SVG circle
+  const circumference = 138; // 2 * PI * r
+  const offset = circumference - (timeLeft / QUESTION_TIME) * circumference;
+  bar.style.strokeDashoffset = offset;
+  
+  const isWarning = timeLeft <= 10;
+  $('timer').classList.toggle('warn', isWarning);
+  bar.classList.toggle('warn', isWarning);
+}
+
+function handleTimeout() {
+  isLocked = true;
+  isRevealed = true;
+  SoundEffects.wrongAnswer();
+  renderGame();
+  setTimeout(() => handleGameOver(false), 2000);
+}
+
+function restartGame() {
+  questions = prepareQuestions();
+  level = 0;
+  selectedOption = null;
+  isRevealed = false;
+  isLocked = false;
+  timeLeft = QUESTION_TIME;
+  hiddenOptions = [];
+  usedLifelines = { fifty: false, friend: false, audience: false };
+  gameStatus = 'playing';
+  closePopup();
+  renderGame();
+  startNextQuestion();
+  
+  if (musicInterval) clearInterval(musicInterval);
+  playSuspenseAmbient();
+  musicInterval = setInterval(playSuspenseAmbient, 4000);
+}
+
+function startNextQuestion() {
+  selectedOption = null;
+  isRevealed = false;
+  isLocked = false;
+  hiddenOptions = [];
+  timeLeft = QUESTION_TIME;
+  renderGame();
+  SoundEffects.intro();
+  startCountdown();
+}
+
+function selectAnswer(option) {
+  if (isLocked) return;
+  selectedOption = option;
+  isLocked = true;
+  clearInterval(countdownTimer);
+  stopHeartbeat();
+  
+  SoundEffects.clickOption();
+  renderGame();
+  
+  // High suspense timing before revealing answer
+  setTimeout(() => {
+    isRevealed = true;
+    renderGame();
+    const currentQ = questions[level];
+    
+    if (option === currentQ.correct) {
+      SoundEffects.correctAnswer();
+      setTimeout(() => {
+        if (level + 1 >= questions.length) {
+          handleGameOver(true);
+        } else {
+          level++;
+          startNextQuestion();
+        }
+      }, 2000);
+    } else {
+      SoundEffects.wrongAnswer();
+      setTimeout(() => handleGameOver(false), 2500);
+    }
+  }, 1800);
+}
+
+function handleGameOver(isWin) {
+  gameStatus = isWin ? 'won' : 'lost';
+  clearInterval(countdownTimer);
+  stopHeartbeat();
+  if (musicInterval) clearInterval(musicInterval);
+  
+  if (isWin) {
+    SoundEffects.gameWin();
+    showPopup(
+      '🏆 انتصار العباقرة الكبار',
+      `لقد اجتزت جميع المستويات ببراعة متناهية وحققت <span class="gold" style="font-weight:900; font-size:24px;">1,000,000 نقطة</span> لتدخل في لوحة شرف الخوارزمي الصغير!`,
+      true,
+      '👑'
+    );
+  } else {
+    // Find the last milestone level achieved
+    let wonValue = 0;
+    const achievedLevels = [...SAFE_LEVELS].filter(l => l < level);
+    if (achievedLevels.length > 0) {
+      const lastSafeIndex = achievedLevels[achievedLevels.length - 1];
+      wonValue = SCORES[lastSafeIndex];
+    }
+    
+    showPopup(
+      'انتهت المسابقة',
+      `للأسف الإجابة غير صحيحة، أو انتهى وقتك المتاح.<br>الرصيد المضمون الذي حصلت عليه هو:<br><span class="gold" style="font-size: 28px; font-weight: 900; display: block; margin: 12px 0;">${wonValue.toLocaleString('ar-EG')} نقطة</span>حظاً أوفر في المرات القادمة!`,
+      true,
+      '💀'
+    );
+  }
+}
+
+// Lifeline 1: 50/50
+function useFiftyFifty() {
+  if (usedLifelines.fifty || isLocked) return;
+  usedLifelines.fifty = true;
+  SoundEffects.useLifeline();
+  
+  const currentQ = questions[level];
+  const wrongOptions = currentQ.options.filter(o => o !== currentQ.correct);
+  // Keep only one random incorrect answer and the correct answer
+  const shuffledWrong = shuffle(wrongOptions);
+  hiddenOptions = shuffledWrong.slice(0, 2);
+  renderGame();
+}
+
+// Lifeline 2: Phone a Friend
+function usePhoneFriend() {
+  if (usedLifelines.friend || isLocked) return;
+  usedLifelines.friend = true;
+  SoundEffects.useLifeline();
+  
+  const currentQ = questions[level];
+  // 80% accuracy chance
+  const isAccurate = Math.random() < 0.82;
+  const recommendedAnswer = isAccurate ? currentQ.correct : currentQ.options.find(o => o !== currentQ.correct);
+  
+  showPopup(
+    '💬 اتصال بالصديق والعلماء',
+    `يتصل الخوارزمي بصديقه الرياضي الذكي ويرى الصديق أن الإجابة الأكثر دقة وصحة هي بالتأكيد:<br><br><span class="gold" style="font-size:24px; font-weight:900; background:rgba(0,0,0,0.2); padding:10px 20px; border-radius:10px; display:inline-block; border:1px dashed var(--gold);">${recommendedAnswer}</span>`,
+    false,
+    '📞'
+  );
+  renderGame();
+}
+
+// Lifeline 3: Ask the Audience
+function useAskAudience() {
+  if (usedLifelines.audience || isLocked) return;
+  usedLifelines.audience = true;
+  SoundEffects.useLifeline();
+  
+  const currentQ = questions[level];
+  const correctIdx = currentQ.options.indexOf(currentQ.correct);
+  
+  // Distribute percentages: correct option gets most weight
+  let percentages = [10, 10, 10, 10];
+  let remainder = 60;
+  
+  // Inject majority weight into correct answer
+  percentages[correctIdx] += remainder;
+  
+  // Randomly distribute variations
+  for (let i = 0; i < 4; i++) {
+    if (i !== correctIdx) {
+      const extra = Math.floor(Math.random() * 10);
+      percentages[i] += extra;
+      percentages[correctIdx] -= extra;
+    }
+  }
+  
+  let audienceHTML = '<div class="audience-box">';
+  currentQ.options.forEach((opt, i) => {
+    audienceHTML += `
+      <div class="vote-bar-row">
+        <div class="vote-info">
+          <span class="vote-label">${LETTERS[i]}: ${opt}</span>
+          <span class="vote-percentage">${percentages[i]}%</span>
+        </div>
+        <div class="vote-track">
+          <div class="vote-fill" style="width: ${percentages[i]}%"></div>
+        </div>
+      </div>
+    `;
+  });
+  audienceHTML += '</div>';
+  
+  showPopup(
+    '📊 تصويت جمهور القاعة الخوارزمية',
+    `إليك توزيع أصوات الجماهير الحاضرة بعد تصويتهم على السؤال الحالي:<br>${audienceHTML}`,
+    false,
+    '👥'
+  );
+  renderGame();
+}
+
+// Popup Controllers
+function showPopup(title, body, isGameOverEnd = false, icon = '💡') {
+  $('popupIcon').textContent = icon;
+  $('popupTitle').textContent = title;
+  $('popupBody').innerHTML = body;
+  
+  const btn = $('popupBtn');
+  if (isGameOverEnd) {
+    btn.textContent = '🎮 العب من جديد';
+    btn.onclick = () => {
+      closePopup();
+      restartGame();
+    };
+  } else {
+    btn.textContent = 'فهمت، عودة للمسابقة';
+    btn.onclick = closePopup;
+  }
+  
+  $('popup').classList.add('active');
+}
+
+function closePopup() {
+  $('popup').classList.remove('active');
+}
+
+// Render dynamic elements
+function renderGame() {
+  const currentQ = questions[level];
+  if (!currentQ) return;
+  
+  // Stats Header
+  $('qcount').textContent = `السؤال رقم ${level + 1} من أصل 15`;
+  $('qnum').textContent = `المستوى ${level + 1}`;
+  $('qscore').textContent = `الجائزة: ${SCORES[level].toLocaleString('ar-EG')} نقطة`;
+  $('qtext').textContent = currentQ.text;
+  
+  // Draw options
+  const optsContainer = $('opts');
+  optsContainer.innerHTML = '';
+  
+  currentQ.options.forEach((opt, idx) => {
+    let stateClass = '';
+    const isHidden = hiddenOptions.includes(opt);
+    
+    if (isRevealed) {
+      if (opt === currentQ.correct) {
+        stateClass = 'correct';
+      } else if (opt === selectedOption) {
+        stateClass = 'wrong';
+      }
+    } else if (selectedOption === opt) {
+      stateClass = 'selected';
+    }
+    
+    const btn = document.createElement('button');
+    btn.className = `opt-btn ${stateClass} ${isHidden ? 'hidden' : ''}`;
+    btn.disabled = isLocked || isHidden;
+    
+    btn.innerHTML = `
+      <div class="opt-frame">
+        <div class="opt-inner">
+          <span class="opt-badge">${LETTERS[idx]}</span>
+          <span class="opt-text">${opt}</span>
+        </div>
+      </div>
+    `;
+    
+    btn.onclick = () => selectAnswer(opt);
+    optsContainer.appendChild(btn);
+  });
+  
+  // Render Left Side Money Ladder
+  const ladder = $('ladder');
+  ladder.innerHTML = '';
+  
+  for (let i = SCORES.length - 1; i >= 0; i--) {
+    const item = document.createElement('li');
+    item.className = 'ladder-item';
+    
+    if (i === level) {
+      item.className += ' current';
+    } else if (i < level) {
+      item.className += ' passed';
+    } else if (SAFE_LEVELS.has(i)) {
+      item.className += ' safe';
+    }
+    
+    item.innerHTML = `
+      <span>${i + 1}</span>
+      <span>${SCORES[i].toLocaleString('ar-EG')} نقطة</span>
+      ${i === level ? '<span class="star-pointer">⭐</span>' : ''}
+    `;
+    
+    ladder.appendChild(item);
+  }
+  
+  // Update lifelines buttons
+  $('ll50').disabled = usedLifelines.fifty || isLocked;
+  $('llFriend').disabled = usedLifelines.friend || isLocked;
+  $('llAud').disabled = usedLifelines.audience || isLocked;
+}
+
+// Transition from Welcome screen to Game board
+function handleStartChallenge() {
+  const nameInput = $('studentNameInput').value.trim();
+  const gradeInput = $('studentGradeInput').value.trim() || 'خامس';
+  const schoolInput = $('studentSchoolInput').value.trim() || 'الحصان النموذجية';
+  
+  if (!nameInput) {
+    // Show visual warning
+    $('studentNameInput').style.borderColor = 'var(--red)';
+    $('studentNameInput').placeholder = 'الرجاء إدخال اسمك أولاً!';
+    // Highlight input effect
+    playTone([300, 150], 0.3, 'sawtooth', 0.15);
+    return;
+  }
+  
+  // Save credentials to display badge
+  $('displayStudentName').textContent = nameInput;
+  $('displayStudentGrade').textContent = gradeInput;
+  $('displayStudentSchool').textContent = schoolInput;
+  
+  // Audio Initialization bypass
+  soundEnabled = true; // Auto-enable on user gesture
+  initAudio();
+  
+  // Transition fade out/in
+  $('welcome-screen').style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+  $('welcome-screen').style.opacity = '0';
+  $('welcome-screen').style.transform = 'scale(0.95)';
+  
+  setTimeout(() => {
+    $('welcome-screen').style.display = 'none';
+    const mainBoard = $('game-board');
+    mainBoard.style.display = 'block';
+    mainBoard.style.opacity = '0';
+    mainBoard.style.transition = 'opacity 0.5s ease';
+    
+    // Trigger paint
+    setTimeout(() => {
+      mainBoard.style.opacity = '1';
+      restartGame();
+    }, 50);
+  }, 400);
+}
+
+// Hook Event Listeners
+$('ll50').onclick = useFiftyFifty;
+$('llFriend').onclick = usePhoneFriend;
+$('llAud').onclick = useAskAudience;
+$('resetBtn').onclick = restartGame;
+$('startChallengeBtn').onclick = handleStartChallenge;
+
+// Sound toggle controller
+const muteBtn = $('muteBtn');
+muteBtn.onclick = () => {
+  soundEnabled = !soundEnabled;
+  if (soundEnabled) {
+    muteBtn.textContent = '🔇 كتم الأصوات والموسيقى';
+    muteBtn.className = 'btn-ghost';
+    initAudio();
+    playSuspenseAmbient();
+    if (musicInterval) clearInterval(musicInterval);
+    musicInterval = setInterval(playSuspenseAmbient, 4000);
+  } else {
+    muteBtn.textContent = '🔊 تشغيل الموسيقى والآثار';
+    muteBtn.className = 'btn-primary';
+    stopHeartbeat();
+    if (musicInterval) {
+      clearInterval(musicInterval);
+      musicInterval = null;
+    }
+  }
+};
+
+// Start the whole environment
+window.onload = () => {
+  initParticles();
+  // Instead of starting the game immediately, we wait on the welcome screen.
+};
 </script>
 </body>
 </html>
